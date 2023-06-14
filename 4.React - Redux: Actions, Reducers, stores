@@ -1,0 +1,92 @@
+React - Redux: Actions, Reducers, stores
+Design a counter with + and - buttons to change the value of the counter. Store the value of the counter in the redux store.
+--------------------------------------------------------------------------------------------------------------------
+Install the required dependencies:
+
+Install Redux and React Redux by running the following command in your project directory:
+Copy code
+npm install redux react-redux
+
+Import necessary Redux modules in your index.js file:--------------
+jsx
+import { StrictMode } from "react";
+import ReactDOM from "react-dom";
+import { Provider } from "react-redux"; // Import Provider from react-redux
+import { createStore } from "redux"; // Import createStore from redux
+
+import App from "./App";
+
+// Define the reducer
+const counterReducer = (state = 0, action) => {
+  switch (action.type) {
+    case "INCREMENT":
+      return state + 1;
+    case "DECREMENT":
+      return state - 1;
+    default:
+      return state;
+  }
+};
+
+// Create the Redux store
+const store = createStore(counterReducer);
+
+const rootElement = document.getElementById("root");
+ReactDOM.render(
+  <StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </StrictMode>,
+  rootElement
+);
+
+Modify your App.js file to connect the component to the Redux store:---------------------------
+jsx:----------------------
+import { connect } from "react-redux";
+import { increment, decrement } from "./actions"; // Import the actions
+
+import "./styles.css";
+
+function App({ count, increment, decrement }) {
+  return (
+    <div className="App">
+      <h1>Count: {count}</h1>
+      <h2>
+        <button onClick={increment}>+</button>
+        <button onClick={decrement}>-</button>
+      </h2>
+    </div>
+  );
+}
+
+// Map state from Redux store to component props
+const mapStateToProps = (state) => {
+  return {
+    count: state, // 'count' corresponds to the state property in the Redux store
+  };
+};
+
+// Map dispatch actions to component props
+const mapDispatchToProps = {
+  increment,
+  decrement,
+};
+
+// Connect the component to Redux store
+export default connect(mapStateToProps, mapDispatchToProps)(App);
+
+Create the actions file actions.js to define the increment and decrement actions:=---------------------
+jsx
+
+export const increment = () => {
+  return {
+    type: "INCREMENT",
+  };
+};
+
+export const decrement = () => {
+  return {
+    type: "DECREMENT",
+  };
+};
