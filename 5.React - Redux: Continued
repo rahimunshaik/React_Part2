@@ -1,0 +1,112 @@
+React - Redux: Continued
+Create two middlewares in the previous question:
+- One which logs the type of action being done
+- The other one to stop the action if it is to subtract count
+Use arrow functions to create middlewares.
+===================================================
+src/
+App.js==================================
+import "./styles.css";
+import { addCount, substractCount } from "./actions";
+import { useState } from "react";
+export default function App(props) {
+  const { count } = props.store.getState();
+  const [value, toggle] = useState(0);
+  const add = () => {
+    addCount(props.store);
+    toggle((value) => value ^ 1);
+  };
+  const substract = () => {
+    substractCount(props.store);
+    toggle((value) => value ^ 1);
+  };
+  return (
+    <div className="App">
+      <h1>Count: {count}</h1>
+      <h2>
+        <button onClick={add}>+</button>
+        <button onClick={substract}>-</button>
+      </h2>
+    </div>
+  );
+}
+
+actions.js===============================================
+// actions.js
+export const ADD_COUNT = "ADD_COUNT";
+export const SUBSTRACT_COUNT = "SUBSTRACT_COUNT";
+
+export const addCount = () => {
+  return {
+    type: ADD_COUNT
+  };
+};
+
+export const substractCount = () => {
+  return {
+    type: SUBSTRACT_COUNT
+  };
+};
+index.js===========================================================
+import { StrictMode } from "react";
+import ReactDOM from "react-dom";
+import { createStore, applyMiddleware } from "redux";
+import appReducer from "./reducer";
+import App from "./App";
+import { addCount, substractCount } from "./actions";
+
+// Middleware 1: Logging middleware
+const loggingMiddleware = (store) => (next) => (action) => {
+  console.log("Action type:", action.type);
+  return next(action);
+};
+
+// Middleware 2: Stop action middleware
+const stopActionMiddleware = (store) => (next) => (action) => {
+  if (action.type === substractCount.type) {
+    const { count } = store.getState();
+    if (count <= 0) {
+      console.log("Cannot subtract count below zero.");
+      return;
+    }
+  }
+  return next(action);
+};
+
+const store = createStore(
+  appReducer,
+  applyMiddleware(loggingMiddleware, stopActionMiddleware)
+);
+
+const rootElement = document.getElementById("root");
+ReactDOM.render(
+  <StrictMode>
+    <App store={store} />
+  </StrictMode>,
+  rootElement
+);
+
+// Dispatching an example action
+store.dispatch(addCount(store));
+reducer.js====================================================
+import { ADD_COUNT, SUBSTRACT_COUNT } from "./actions";
+const initialState = {
+  count: 0
+};
+
+export default function appReducer(state = initialState, action) {
+  switch (action.type) {
+    case ADD_COUNT:
+      return {
+        ...state,
+        count: state.count + 1
+      };
+    case SUBSTRACT_COUNT:
+      return {
+        ...state,
+        count: state.count - 1
+      };
+    default:
+      return state;
+  }
+}
